@@ -5,6 +5,9 @@ const router = express.Router();
 //加密库
 const crypto = require('crypto');
 
+//数据库
+const dbopt = require('./module/sqlite');
+
 // gateway()
 //   .load(path.join(__dirname, 'config'))
 //   .run();
@@ -60,15 +63,17 @@ function wb_check(auth) {
  * @param {*} next 下一步
  */
 function wb_auth_hook(req, res, next) {
-  if (req.url.startsWith('/auth/') === true) {
-    //授权接口不拦截
-    next()
-  } else if (wb_check('') === false) {
-    res.send(wb_json_encode(401, { 'msg': 'Unauthorized' }));
-    res.end();
-  } else {
-    next()
-  }
+  //调试先禁用授权
+  next();
+  // if (req.url.startsWith('/auth/') === true) {
+  //   //授权接口不拦截
+  //   next()
+  // } else if (wb_check('') === false) {
+  //   res.send(wb_json_encode(401, { 'msg': 'Unauthorized' }));
+  //   res.end();
+  // } else {
+  //   next()
+  // }
 }
 
 //拦截路由，未授权的
@@ -107,6 +112,10 @@ app.get('/auth/:src', (req, res) => {
 //[测试]秘钥接口
 app.get('/getkey/:pass', (req, res) => {
   res.send(wb_json_encode(402, { 'src': wb_auth(req.params.pass) }));
+})
+
+app.get('/getword/:name', (req, res) => {
+  res.send(wb_json_encode(200, dbopt.get_word(req.params.name)));
 })
 
 app.listen(port, () => {
