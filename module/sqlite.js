@@ -39,10 +39,37 @@ function get_word(name) {
                 resolve(row);
             }
         });
-    })
+    });
     return promise;
 }
 
+/**
+ * 随机取出一组不重复的词
+ * @param {int} num 数量
+ * @returns Promise对象(异步)
+ */
+function get_word_random(num) {
+    if (!is_connect) {
+        connect();
+    }
+    var promise = new Promise((resolve, reject) => {
+        //需要所有数据,用all
+        sqlite.each(`WITH selected AS (
+            SELECT * FROM word ORDER BY RANDOM() LIMIT ?
+          )
+          SELECT * FROM word WHERE word_ID NOT IN (SELECT word_ID FROM selected)`, [num], function (err, row) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+    return promise;
+}
+
+//导出需要的方法
 module.exports = {
-    get_word: get_word
+    get_word: get_word,
+    get_word_random: get_word_random
 };
