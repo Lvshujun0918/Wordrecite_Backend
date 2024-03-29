@@ -22,7 +22,7 @@ const key = 'FhWlhusOmel3M6MkXLdsTIvGLkiEiOi40PlESBik1zLie0KzJQqLZ0OE3Feqbosl'
 /**
  * 拼合json函数
  * @param {string} msg 返回码或错误
- * @param {Array} arr 数据
+ * @param {object} arr 数据
  * @returns 拼合后的数据
  */
 function wb_json_encode(code, arr, res) {
@@ -115,9 +115,16 @@ app.get('/getkey/:pass', (req, res) => {
   res.send(wb_json_encode(402, { 'src': wb_auth(req.params.pass) }, res));
 })
 
-app.get('/getword/:name', (req, res) => {
-  res.send(wb_json_encode(200, dbopt.get_word(req.params.name), res));
+/**
+ * 获取词语路由
+ */
+app.get('/getword/:name', async (req, res) => {
+  //异步取得数据
+  var data = await dbopt.get_word(req.params.name);
+  res.send(wb_json_encode(200, data, res));
 })
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
