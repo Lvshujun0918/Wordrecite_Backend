@@ -25,7 +25,8 @@ const key = 'FhWlhusOmel3M6MkXLdsTIvGLkiEiOi40PlESBik1zLie0KzJQqLZ0OE3Feqbosl'
  * @param {Array} arr 数据
  * @returns 拼合后的数据
  */
-function wb_json_encode(code, arr) {
+function wb_json_encode(code, arr, res) {
+  res.statusCode = code;
   const output = JSON.stringify({ code: code, data: arr });
   return output;
 }
@@ -82,12 +83,12 @@ router.all('*', wb_auth_hook);
 app.use(router);
 
 app.get('/', (req, res) => {
-  res.send(wb_json_encode(404, { 'msg': 'No Route' }));
+  res.send(wb_json_encode(404, { 'msg': 'No Route' }, res));
 })
 
 //版本号接口
 app.get('/version', (req, res) => {
-  res.send(wb_json_encode(200, { 'version': ver }));
+  res.send(wb_json_encode(200, { 'version': ver }, res));
 })
 
 //授权接口
@@ -97,7 +98,7 @@ app.get('/auth/:src', (req, res) => {
     res.send(wb_json_encode(200, {
       'src': req.params.src,
       'time': Date.now()
-    }));
+    }), res);
     //把秘钥存下来
     app.set('wb_src', req.params.src)
   }
@@ -105,17 +106,17 @@ app.get('/auth/:src', (req, res) => {
     //授权失败
     //清空秘钥
     app.set('wb_src', '');
-    res.send(wb_json_encode(401, { 'msg': 'Authorize Failed' }));
+    res.send(wb_json_encode(401, { 'msg': 'Authorize Failed' }), res);
   }
 })
 
 //[测试]秘钥接口
 app.get('/getkey/:pass', (req, res) => {
-  res.send(wb_json_encode(402, { 'src': wb_auth(req.params.pass) }));
+  res.send(wb_json_encode(402, { 'src': wb_auth(req.params.pass) }, res));
 })
 
 app.get('/getword/:name', (req, res) => {
-  res.send(wb_json_encode(200, dbopt.get_word(req.params.name)));
+  res.send(wb_json_encode(200, dbopt.get_word(req.params.name), res));
 })
 
 app.listen(port, () => {
