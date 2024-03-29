@@ -1,4 +1,4 @@
-//sqlite操作类]
+//sqlite操作类
 //引入库
 const sqlite3 = require('sqlite3').verbose();
 var is_connect = false;
@@ -19,17 +19,30 @@ function connect() {
     return sqlite;
 }
 
-module.exports.get_word = function get_word(name) {
+/**
+ * 查询单词函数
+ * @param {string} name 单词名称
+ * @returns Promise对象(异步)
+ */
+function get_word(name) {
     if (!is_connect) {
         //未连接则连接
         connect();
     }
-    sqlite.all('SELECT word_ID, word_name, word_meaning, word_comment, word_times, word_times_right FROM word WHERE word_name = ? ', [name], function (err, row) {
-        if (err) {
-            return false;
-        }
-        console.log(row);
-        console.log(typeof(row[0]));
-        return Object.values(row[0]);
+    //异步完成
+    var promise = new Promise((resolve, reject) => {
+        //只需要取得第一个即可
+        sqlite.each('SELECT word_ID, word_name, word_meaning, word_comment, word_times, word_times_right FROM word WHERE word_name = ? ', [name], function (err, row) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
     })
+    return promise;
 }
+
+module.exports = {
+    get_word: get_word
+};
