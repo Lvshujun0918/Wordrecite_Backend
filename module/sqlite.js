@@ -54,7 +54,7 @@ function get_word_random(num) {
     }
     var promise = new Promise((resolve, reject) => {
         //需要所有数据,用all
-        sqlite.each(`WITH selected AS (
+        sqlite.all(`WITH selected AS (
             SELECT * FROM word ORDER BY RANDOM() LIMIT ?
           )
           SELECT * FROM word WHERE word_ID NOT IN (SELECT word_ID FROM selected)`, [num], function (err, row) {
@@ -68,8 +68,65 @@ function get_word_random(num) {
     return promise;
 }
 
+/**
+ * 获取某词语的做题次数和正确次数
+ * @param {string} name 单词明策划
+ * @returns Promise对象(异步)
+ */
+function get_word_times(name) {
+    if (!is_connect) {
+        connect();
+    }
+    var promise = new Promise((resolve, reject) => {
+        sqlite.each(`SELECT word_times,
+        word_times_right
+   FROM word
+  WHERE word_name = ?;`, [num], function (err, row) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+    return promise;
+}
+
+/**
+ * 更新某词语做题和正确次数
+ * @param {string} name 单词名称
+ * @param {bool} right 是否作对
+ * @returns Promise对象(异步)
+ */
+async function set_word_times(name, right) {
+    if (!is_connect) {
+        connect();
+    }
+    var org_times = await get_word_times(name);
+    if (right) {
+        org_times['word_times'] += 1;
+    }
+    org_times['word_times'] += 1;
+    var promise = new Promise((resolve, reject) => {
+        //需要所有数据,用all
+        sqlite.each(`UPDATE word
+        SET word_times = ?,
+            word_times_right = ?
+      WHERE word_name = ?;`, [org_times['word_times'], org_times['word_times'], num], function (err, row) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+    return promise;
+}
+
 //导出需要的方法
 module.exports = {
     get_word: get_word,
-    get_word_random: get_word_random
+    get_word_random: get_word_random,
+    get_word_times: get_word_times,
+    set_word_times: set_word_times
 };
