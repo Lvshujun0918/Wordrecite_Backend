@@ -27,7 +27,7 @@ const key = 'FhWlhusOmel3M6MkXLdsTIvGLkiEiOi40PlESBik1zLie0KzJQqLZ0OE3Feqbosl'
  */
 function wb_json_encode(code, arr, res) {
   res.statusCode = code;
-  const output = JSON.stringify({ code: code, data: arr });
+  const output = { code: code, data: arr };
   return output;
 }
 
@@ -83,19 +83,19 @@ router.all('*', wb_auth_hook);
 app.use(router);
 
 app.get('/', (req, res) => {
-  res.send(wb_json_encode(404, { 'msg': 'No Route' }, res));
+  res.json(wb_json_encode(404, { 'msg': 'No Route' }, res));
 })
 
 //版本号接口
 app.get('/version', (req, res) => {
-  res.send(wb_json_encode(200, { 'version': ver }, res));
+  res.json(wb_json_encode(200, { 'version': ver }, res));
 })
 
 //授权接口
 app.get('/auth/:src', (req, res) => {
   if (wb_check(req.params.src)) {
     //授权通过
-    res.send(wb_json_encode(200, {
+    res.json(wb_json_encode(200, {
       'src': req.params.src,
       'time': Date.now()
     }), res);
@@ -106,13 +106,13 @@ app.get('/auth/:src', (req, res) => {
     //授权失败
     //清空秘钥
     app.set('wb_src', '');
-    res.send(wb_json_encode(401, { 'msg': 'Authorize Failed' }, res));
+    res.json(wb_json_encode(401, { 'msg': 'Authorize Failed' }, res));
   }
 })
 
 //[测试]秘钥接口
 app.get('/getkey/:pass', (req, res) => {
-  res.send(wb_json_encode(402, { 'src': wb_auth(req.params.pass) }, res));
+  res.json(wb_json_encode(402, { 'src': wb_auth(req.params.pass) }, res));
 })
 
 /**
@@ -121,16 +121,19 @@ app.get('/getkey/:pass', (req, res) => {
 app.get('/getword/:name', async (req, res) => {
   //异步取得数据
   var data = await dbopt.get_word(req.params.name);
-  res.send(wb_json_encode(200, data, res));
+  res.json(wb_json_encode(200, data, res));
 })
 
 /**
  * 做题词语路由
  */
-app.get('/setword/:name', async (req, res) => {
-  //异步取得数据
-  dbopt.set_word_times(req.params.name, true);
-  res.send(wb_json_encode(200, { 'msg': 'Updated' }, res));
+app.get('/setword/:name/:right', async (req, res) => {
+  var right = false;
+  if (req.params.right === 'T') {
+    right = true;
+  }
+  await dbopt.set_word_times(req.params.name, right);
+  res.json(wb_json_encode(200, { 'msg': 'Updated' }, res));
 })
 
 app.listen(port, () => {
