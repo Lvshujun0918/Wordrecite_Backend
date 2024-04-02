@@ -70,7 +70,7 @@ function get_word_random(num) {
 
 /**
  * 获取某词语的做题次数和正确次数
- * @param {string} name 单词明策划
+ * @param {string} name 单词名称
  * @returns Promise对象(异步)
  */
 function get_word_times(name) {
@@ -82,6 +82,38 @@ function get_word_times(name) {
         word_times_right
    FROM word
   WHERE word_name = ?;`, [num], function (err, row) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+    return promise;
+}
+
+/**
+ * 添加新词语
+ * @param {string} name 单词名称
+ * @param {string} meaning 单词意思
+ * @param {string} comment 单词备注
+ * @returns Promise对象(异步)
+ */
+function add_word(name, meaning, comment) {
+    if (!is_connect) {
+        connect();
+    }
+    var promise = new Promise((resolve,reject)=>{
+        sqlite.run(`INSERT INTO word (
+            word_comment,
+            word_meaning,
+            word_name
+        )
+        VALUES (
+            ?,
+            ?,
+            ?
+        );`, [comment,meaning,name], function (err, row) {
             if (err) {
                 reject(err);
             } else {
@@ -128,5 +160,6 @@ module.exports = {
     get_word: get_word,
     get_word_random: get_word_random,
     get_word_times: get_word_times,
-    set_word_times: set_word_times
+    set_word_times: set_word_times,
+    add_word: add_word
 };
