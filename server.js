@@ -106,7 +106,7 @@ app.get('/auth/:src', (req, res) => {
     //授权失败
     //清空秘钥
     app.set('wb_src', '');
-    res.send(wb_json_encode(401, { 'msg': 'Authorize Failed' }), res);
+    res.send(wb_json_encode(401, { 'msg': 'Authorize Failed' }, res));
   }
 })
 
@@ -124,7 +124,14 @@ app.get('/getword/:name', async (req, res) => {
   res.send(wb_json_encode(200, data, res));
 })
 
-
+/**
+ * 做题词语路由
+ */
+app.get('/setword/:name', async (req, res) => {
+  //异步取得数据
+  dbopt.set_word_times(req.params.name, true);
+  res.send(wb_json_encode(200, { 'msg': 'Updated' }, res));
+})
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
