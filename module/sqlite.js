@@ -145,11 +145,12 @@ async function set_word_times(name, right) {
             word_times_right = ?
       WHERE word_name = ?;`, [org_times['word_times'], org_times['word_times']], function (err, row) {
         if (err) {
-            reject(err);
+            return false;
         } else {
-            resolve(row);
+            return true;
         }
     });
+    return true;
     // });
     // return promise;
 }
