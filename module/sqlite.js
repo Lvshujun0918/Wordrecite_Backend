@@ -103,7 +103,7 @@ function add_word(name, meaning, comment) {
     if (!is_connect) {
         connect();
     }
-    var promise = new Promise((resolve,reject)=>{
+    var promise = new Promise((resolve, reject) => {
         sqlite.run(`INSERT INTO word (
             word_comment,
             word_meaning,
@@ -113,7 +113,7 @@ function add_word(name, meaning, comment) {
             ?,
             ?,
             ?
-        );`, [comment,meaning,name], function (err, row) {
+        );`, [comment, meaning, name], function (err, row) {
             if (err) {
                 reject(err);
             } else {
@@ -139,20 +139,19 @@ async function set_word_times(name, right) {
         org_times['word_times'] += 1;
     }
     org_times['word_times'] += 1;
-    var promise = new Promise((resolve, reject) => {
-        //需要所有数据,用all
-        sqlite.each(`UPDATE word
+    //var promise = new Promise((resolve, reject) => {
+    sqlite.run(`UPDATE word
         SET word_times = ?,
             word_times_right = ?
       WHERE word_name = ?;`, [org_times['word_times'], org_times['word_times'], num], function (err, row) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(row);
-            }
-        });
+        if (err) {
+            reject(err);
+        } else {
+            resolve(row);
+        }
     });
-    return promise;
+    // });
+    // return promise;
 }
 
 //导出需要的方法
