@@ -134,25 +134,27 @@ async function set_word_times(name, right) {
     if (!is_connect) {
         connect();
     }
+    //原始数据
     var org_times = await get_word_times(name);
+
     if (right) {
-        org_times['word_times'] += 1;
+        org_times['word_times_right'] += 1;
     }
     org_times['word_times'] += 1;
-    //var promise = new Promise((resolve, reject) => {
-    sqlite.run(`UPDATE word
+
+    var promise = new Promise((resolve, reject) => {
+        sqlite.run(`UPDATE word
         SET word_times = ?,
             word_times_right = ?
-      WHERE word_name = ?;`, [org_times['word_times'], org_times['word_times']], function (err, row) {
-        if (err) {
-            return false;
-        } else {
-            return true;
-        }
+      WHERE word_name = ?;`, [org_times['word_times'], org_times['word_times_right'], name], function (err, row) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
     });
-    return true;
-    // });
-    // return promise;
+    return promise;
 }
 
 //导出需要的方法
